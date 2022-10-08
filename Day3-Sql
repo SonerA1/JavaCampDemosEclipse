@@ -31,4 +31,4 @@ on o.OrderID = od.OrderID
 
 Select * from Customers c  left join Orders o--inner dediğimizde 830 -- left832 müşterilerde olup siparişlerde olmayanlar.
 on c.CustomerID = o.CustomerID
-where o.CustomerID is null -- geri kalan 2 taneyi gösterir
+where o.CustomerID is null -- geri kalan 2 taneyi gösterir 
