@@ -1,11 +1,14 @@
 package Kodlama.io.Devs.business.concretes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import Kodlama.io.Devs.business.abstracts.ProgrammingLanguageService;
+import Kodlama.io.Devs.business.request.ProgrammingLanguageRequest;
+import Kodlama.io.Devs.business.responses.ProgrammingLanguageResponse;
 import Kodlama.io.Devs.dataAccess.abstracts.ProgrammingLanguageRepository;
 import Kodlama.io.Devs.entities.concretes.ProgrammingLanguage;
 
@@ -21,66 +24,64 @@ public class ProgrammingLanguageManager implements ProgrammingLanguageService {
 	}
 
 	@Override
-	public List<ProgrammingLanguage> getAll() {
+	public List<ProgrammingLanguageResponse> getAll() {
+		List<ProgrammingLanguageResponse> responses = new ArrayList<ProgrammingLanguageResponse>();
+		List<ProgrammingLanguage> languages = programmingLanguageRepository.findAll();
+		for (ProgrammingLanguage programmingLanguage : languages) {
+			ProgrammingLanguageResponse responseItem = new ProgrammingLanguageResponse();
+			responseItem.setId(programmingLanguage.getId());
+			responseItem.setName(programmingLanguage.getName());
+			responses.add(responseItem);
+		}
 		// İş kuralları.
-		return programmingLanguageRepository.getAll();
+		return responses;
 	}
 
 	@Override
-	public ProgrammingLanguage getById(int id) throws Exception {
-		if (!isIdExist(id)) {
-			throw new Exception("Id not found.");
-		}
-		return programmingLanguageRepository.getById(id);
+	public ProgrammingLanguage getById(int id)  {
+		return programmingLanguageRepository.findById(id);
 	}
 
 	@Override
-	public void add(ProgrammingLanguage programmingLanguage) throws Exception {
-		if (isIdExist(programmingLanguage.getId())) {
-			throw new Exception("Id is already used");
-		}
-		if (isNameValid(programmingLanguage.getName())) {
-			programmingLanguageRepository.add(programmingLanguage);
-		}
+	public void add(ProgrammingLanguageRequest programmingLanguageRequest) throws Exception {
+		checkNameValid(programmingLanguageRequest.getName());
+		ProgrammingLanguage programmingLanguage = new ProgrammingLanguage();
+		programmingLanguage.setName(programmingLanguage.getName());
+		programmingLanguageRepository.save(programmingLanguage);
+
 	}
 
 	@Override
 	public void delete(int id) {
-		programmingLanguageRepository.delete(id);
+		programmingLanguageRepository.deleteById(id);
 
 	}
 
 	@Override
-	public void update(ProgrammingLanguage programmiLanguage, int id) throws Exception {
-		if (!isIdExist(id)) {
-			throw new Exception("Program updated");
-		}
-		if (isNameValid(programmiLanguage.getName())) {
-			programmingLanguageRepository.update(programmiLanguage, id);
-			;
-		}
+	public void update(ProgrammingLanguageRequest programmingLanguageRequest, int id) throws Exception {
+		checkNameValid(programmingLanguageRequest.getName());
+		ProgrammingLanguage programmingLanguage = programmingLanguageRepository.findById(id);
+		programmingLanguage.setName(programmingLanguageRequest.getName());
+		programmingLanguageRepository.save(programmingLanguage);
+
 	}
 
-	private boolean isIdExist(int id) {
-		for (ProgrammingLanguage programmingLanguage : getAll()) {
-			if (programmingLanguage.getId() == id) {
-				return true;
-
-			}
-		}
-		return false;
+	@Override
+	public ProgrammingLanguageResponse getResponseById(int id) {
+		ProgrammingLanguage programmingLanguage = programmingLanguageRepository.findById(id);
+		ProgrammingLanguageResponse programmingLanguageResponse = new ProgrammingLanguageResponse();
+		programmingLanguageRepository.findById(programmingLanguage.getId());
+		return programmingLanguageResponse;
 	}
 
-	public boolean isNameValid(String name) throws Exception {
+	private void checkNameValid(String name) throws Exception {
+		ProgrammingLanguage isExist = programmingLanguageRepository.findByName(name);
+		if (isExist != null) {
+			throw new Exception("This name already exist!");
+		}
 		if (name.isBlank()) {
-			throw new Exception("Program name is not empty");
+			throw new Exception("Name can't be null");
 		}
-		for (ProgrammingLanguage programmingLanguage : getAll()) {
-			if (programmingLanguage.getName().equals(name)) {
-				throw new Exception("Program name cannot be repaired");
-			}
-		}
-		return true;
-
 	}
+
 }
